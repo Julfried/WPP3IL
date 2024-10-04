@@ -1,0 +1,7 @@
+name: wpp3il
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  # General
+  - python=3.12.*
