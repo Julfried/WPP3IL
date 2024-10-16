@@ -1,4 +1,4 @@
-from Aufgabe1 import get_valid_int_input
+from Aufgabe1 import get_valid_input
 
 def date_is_valid(tag, monat, jahr):
     if is_schaltjahr(jahr):
@@ -14,23 +14,24 @@ def date_is_valid(tag, monat, jahr):
     
     if tag < 1 or tag > valid_days[monat - 1]:
         return False
+    
+    return True
 
 def is_schaltjahr(jahr):
     if jahr % 4 == 0 and (jahr % 100 == 0 or jahr % 400 != 0):
         return True
     return False
 
-tag = get_valid_int_input("Tag: ", type=int)
-monat = get_valid_int_input("Monat: ", type=int)
-jahr = get_valid_int_input("Jahr: ", type=int)
+if __name__ == "__main__":
+    tag = get_valid_input("Tag: ", cast_to=int)
+    monat = get_valid_input("Monat: ", cast_to=int)
+    jahr = get_valid_input("Jahr: ", cast_to=int)
 
-# Check if the date is valid
-if date_is_valid(tag, monat, jahr):
-    print("Datum nicht gültig.")
-else:
-    print("Datum gültig.")
-
-if is_schaltjahr(jahr):
-    print(f"{jahr} ist ein Schaltjahr.")
-
-    
+    # Check if the date is valid
+    if not date_is_valid(tag, monat, jahr):
+        print(f"Datum {tag}.{monat}.{jahr} nicht gültig.")
+    else:
+        if is_schaltjahr(jahr):
+            print(f"{jahr} ist ein Schaltjahr.")
+        else:
+            print(f"{jahr} ist kein Schaltjahr.")

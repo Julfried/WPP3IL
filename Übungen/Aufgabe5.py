@@ -1,12 +1,7 @@
-def get_valid_int_input(prompt):
-	while True:
-		try:
-			return int(input(prompt))
-		except ValueError:
-			print("Please enter a valid number.")
+from Aufgabe1 import get_valid_input
 			
 if __name__ == "__main__":
-    n = get_valid_int_input("n: ")
+    n = get_valid_input("n: ", cast_to=int)
 
     match n:
         case 1: print("Montag")
