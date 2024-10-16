@@ -1,4 +1,3 @@
-
 def get_valid_int_input(prompt):
 	while True:
 		try:
@@ -7,10 +6,10 @@ def get_valid_int_input(prompt):
 			print("Please enter a valid number.")
 
 def convert_seconds_to_string(seconds):
-    hours = seconds // 3600
+    hours = int(seconds // 3600)
     seconds = seconds % 3600
-    minutes = seconds // 60
-    seconds = seconds % 60
+    minutes = int(seconds // 60)
+    seconds = int(seconds % 60)
     return "{}:{}:{}".format(hours, minutes, seconds)
 
 if __name__ == "__main__":
