@@ -3,9 +3,9 @@ from Aufgabe1 import get_valid_input
 
 if __name__ == "__main__":
     # Dreieckseiten einlesen
-    a = get_valid_input("a: ")
-    b = get_valid_input("b: ")
-    c = get_valid_input("c: ")
+    a = get_valid_input("a: ", cast_to=float)
+    b = get_valid_input("b: ", cast_to=float)
+    c = get_valid_input("c: ", cast_to=float)
 	
     # Check if triangle is valid
     if a + b > c and a + c > b and b + c > a:
