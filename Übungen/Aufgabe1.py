@@ -10,7 +10,14 @@ def get_valid_input(prompt: str, cast_to: Callable[[str], T] = str) -> T:
         try:
             return cast_to(input(prompt))
         except ValueError:
-            print("Please enter a valid number.")
+            if cast_to == int:
+                print("Please enter a valid integer.")
+            elif cast_to == float:
+                print("Please enter a valid float.")
+            elif cast_to == str:
+                print("Please enter a valid string.")
+            else:
+                print("Invalid input. Please try again.")
 
 if __name__ == "__main__":
     fahrenheit = get_valid_input("Insert temperature in Fahrenheit: ", cast_to=float)
