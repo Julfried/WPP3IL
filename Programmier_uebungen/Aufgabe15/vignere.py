@@ -19,7 +19,7 @@ def vigenere_encrypt(plain_text, key):
     # Return the cipher text
     return cipher_text
 
-def vigenere_decrypt(cipher_text, key):
+def vigenere_decrypt(cipher_text, key, length_to_decrypt=None):
     # Initialize the plain text
     plain_text = ''
     # Initialize the key index
