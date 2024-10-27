@@ -6,6 +6,7 @@ from vignere import vigenere_encrypt, vigenere_decrypt
 
 # Alphabet to use for the brute force attack
 ALPHABET = 'abcdefghijklmnopqrstuvwxyz'
+MAX_CHUNKSIZE = 30000
 
 # Worker function, which does the actual decription task
 def brute_force_worker(key, cipher_text, known_plaintext_start):
@@ -27,23 +28,25 @@ def brute_force_vigenere(cipher_text, known_plaintext_start, max_key_length=5):
         known_plaintext_start=known_plaintext_start 
     )
 
+    # Create a single generator to yield all possible key combinations
+    key_combinations = itertools.chain.from_iterable(
+        itertools.product(ALPHABET, repeat=key_length) for key_length in range(1, max_key_length + 1)
+    )
+
+    # Calculate optimal chunk size
+    num_total_combinations = sum([len(ALPHABET) ** key_length for key_length in range(1, max_key_length + 1)])
+    print(f"Total number of possible combinations: {num_total_combinations}")
+    opt_chucksize = min(num_total_combinations // cpu_count(), MAX_CHUNKSIZE)
+
     # Perform the brute force attack using multiprocessing
     with Pool(processes=cpu_count()) as pool:
-        # Iterate over all possible key lengths
-        for key_length in range(1, max_key_length + 1):
-            # Generate all possible keys
-            key_combinations = itertools.product(ALPHABET, repeat=key_length)
+        # Iterate over all possible keys using multiprocessing
+        for result in pool.imap_unordered(worker, key_combinations, chunksize=opt_chucksize):
+            key, decrypted_text = result
 
-            # Callculate optimal chunksize
-            opt_chucksize = min(len(ALPHABET) ** key_length // cpu_count(), 100000)
-
-            # Iterate over all possible keys using multiprocessing
-            for result in pool.imap_unordered(worker, key_combinations, chunksize=opt_chucksize):
-                key, decrypted_text = result
-
-                if key:
-                    pool.terminate() # Terminate the pool if a valid key is found
-                    return key, decrypted_text
+            if key:
+                pool.terminate() # Terminate the pool if a valid key is found
+                return key, decrypted_text
             
     return None, None
 
