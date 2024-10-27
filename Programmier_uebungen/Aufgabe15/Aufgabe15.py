@@ -1,20 +1,50 @@
 import itertools
 import time
+from multiprocessing import Pool, cpu_count
+from functools import partial
 from vignere import vigenere_encrypt, vigenere_decrypt
 
-def brute_force_vigenere(cipher_text, known_plaintext_start, max_key_length=5):
-    ALPHABET = 'abcdefghijklmnopqrstuvwxyz'
+# Alphabet to use for the brute force attack
+ALPHABET = 'abcdefghijklmnopqrstuvwxyz'
 
-    # Iterate over all possible key lengths
-    for key_length in range(1, max_key_length + 1):
-        # Generate all possible keys and iterate over them
-        for key in itertools.product(ALPHABET, repeat=key_length):
-            key = "".join(key)
-            # Decrypt the cipher text using the key
-            decrypted_text = vigenere_decrypt(cipher_text, key)
-            # Check if the decrypted text starts with the known plaintext
-            if decrypted_text.startswith(known_plaintext_start):
-                return key, decrypted_text
+# Worker function, which does the actual decription task
+def brute_force_worker(key, cipher_text, known_plaintext_start):
+    key = "".join(key)
+    # Decrypt the cipher text using the key
+    decrypted_text = vigenere_decrypt(cipher_text, key)
+
+    # Check if the decrypted text starts with the known plaintext
+    if decrypted_text.startswith(known_plaintext_start):
+        return key, decrypted_text
+    
+    else:
+        return None, None
+
+def brute_force_vigenere(cipher_text, known_plaintext_start, max_key_length=5):
+    # Genrate a partial function ==> This way cipher_text and known_plaintext_start are fixed and dont have to be appended for each task
+    worker = partial(brute_force_worker,
+        cipher_text=cipher_text,
+        known_plaintext_start=known_plaintext_start 
+    )
+
+    # Perform the brute force attack using multiprocessing
+    with Pool(processes=cpu_count()) as pool:
+        # Iterate over all possible key lengths
+        for key_length in range(1, max_key_length + 1):
+            # Generate all possible keys
+            key_combinations = itertools.product(ALPHABET, repeat=key_length)
+
+            # Callculate optimal chunksize
+            opt_chucksize = min(len(ALPHABET) ** key_length // cpu_count(), 100000)
+
+            # Iterate over all possible keys using multiprocessing
+            for result in pool.imap_unordered(worker, key_combinations, chunksize=opt_chucksize):
+                key, decrypted_text = result
+
+                if key:
+                    pool.terminate() # Terminate the pool if a valid key is found
+                    return key, decrypted_text
+            
     return None, None
 
 if __name__ == "__main__":
