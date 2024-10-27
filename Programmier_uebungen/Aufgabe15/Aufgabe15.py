@@ -10,22 +10,21 @@ MAX_CHUNKSIZE = 30000
 
 # Worker function, which does the actual decription task
 def brute_force_worker(key, cipher_text, known_plaintext_start):
+    # Join key to a single string
     key = "".join(key)
-    # Decrypt the cipher text using the key
+
+    # Decrpyt the cipher text using the current key
     decrypted_text = vigenere_decrypt(cipher_text, key)
 
-    # Check if the decrypted text starts with the known plaintext
-    if decrypted_text.startswith(known_plaintext_start):
-        return key, decrypted_text
-    
-    else:
-        return None, None
+    # Check if the decrypted text starts with the known plaintext start and return
+    return (key, decrypted_text) if decrypted_text.startswith(known_plaintext_start) else (None, None)
+        
 
-def brute_force_vigenere(cipher_text, known_plaintext_start, max_key_length=5):
+def brute_force_vigenere(cipher_text, known_plaintext_start, max_key_length):
     # Genrate a partial function ==> This way cipher_text and known_plaintext_start are fixed and dont have to be appended for each task
     worker = partial(brute_force_worker,
         cipher_text=cipher_text,
-        known_plaintext_start=known_plaintext_start 
+        known_plaintext_start=known_plaintext_start
     )
 
     # Create a single generator to yield all possible key combinations
@@ -44,8 +43,9 @@ def brute_force_vigenere(cipher_text, known_plaintext_start, max_key_length=5):
         for result in pool.imap_unordered(worker, key_combinations, chunksize=opt_chucksize):
             key, decrypted_text = result
 
+            # Terminate the pool if a valid key is found
             if key:
-                pool.terminate() # Terminate the pool if a valid key is found
+                pool.terminate() 
                 return key, decrypted_text
             
     return None, None
@@ -82,7 +82,7 @@ if __name__ == "__main__":
     start_time = time.time()
 
     # Perform brute force attack
-    key, decrypted_text = brute_force_vigenere(cipher_text, known_plaintext_start)
+    key, decrypted_text = brute_force_vigenere(cipher_text, known_plaintext_start, max_key_length=5)
 
     # End timer
     end_time = time.time()
