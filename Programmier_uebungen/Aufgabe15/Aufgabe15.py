@@ -68,6 +68,7 @@ if __name__ == "__main__":
     # Validate the functions
     decrypted_text = vigenere_decrypt(cipher_text, key)
     print(f"Decrypted text: {decrypted_text}")
+    assert decrypted_text == plain_text, "Decryption failed"
 
     # Step2: Perform brute force attack
     # Known cipher text and known plaintext start
