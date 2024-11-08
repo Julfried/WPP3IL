@@ -2,7 +2,7 @@
 
 ### Einleitung
 
-Implementierung eines Brute-Force-Angriffs auf eine Vigenère-Verschlüsselung. Die Implementierung verwendet Multiprocessing, um die Entschlüsselungsaufgaben parallel auszuführen und die Berechnungszeit zu verkürzen.
+Implementierung eines Brute-Force-Angriffs auf eine Vigenère-Verschlüsselung. Die Implementierung verwendet Multiprocessing, um die Entschlüsselungsaufgaben parallel auszuführen und die Berechnungszeit zu verkürzen. Die Implementierung bietet die Option, entweder beim ersten Fund eines passenden Schlüssels zu stoppen oder alle möglichen Kombinationen zu testen.
 
 ### Funktionsbeschreibung
 
@@ -16,133 +16,80 @@ Implementierung eines Brute-Force-Angriffs auf eine Vigenère-Verschlüsselung. 
      - `known_plaintext_start`: Der bekannte Klartextanfang ("hello").
    - **Funktionsweise**: Der Text wird mit dem aktuellen Schlüssel entschlüsselt, und falls der entschlüsselte Text mit dem bekannten Klartextanfang beginnt, wird der Schlüssel zurückgegeben und der entschlüsselte Text ausgegeben. Ansonsten wird zweimal `None` zurückgegeben.
 
-2. **brute_force_vigenere(cipher_text, known_plaintext_start, max_key_length=5)**
+2. **brute_force_vigenere(cipher_text, known_plaintext_start, max_key_length, terminate_on_first_match=True)**
    - Übernimmt die Steuerung des Brute-Force-Angriffs und koordiniert die parallele Entschlüsselung des verschlüsselten Textes.
    - **Parameter**:
      - `cipher_text`: Der verschlüsselte Text.
      - `known_plaintext_start`: Der bekannte Klartextanfang.
      - `max_key_length`: Die maximale Länge des zu testenden Schlüssels.
+     - `terminate_on_first_match`: Bestimmt, ob der Prozess beim ersten Fund beendet werden soll.
    - **Funktionsweise**:
      - Die Funktion testet alle Schlüssellängen bis hin zur maximalen Schlüssellänge `max_key_length`.
      - Für jede Schlüssellänge werden alle möglichen Buchstabenkombinationen generiert. Dazu wird die `itertools.product`-Funktion verwendet.
-     - Die `partial`-Funktion von `functools` wird verwendet, um die `brute_force_worker`-Funktion partiell zu instanziieren, sodass `cipher_text` und `known_plaintext_start` bereits festgelegt sind. Die beiden Variablen sind konstant und müssen nicht bei jedem Worker-Aufruf neu übergeben werden.
-     - Ein Pool von Prozessen (in Anzahl der verfügbaren CPU-Kerne) wird erstellt und die Entschlüsselungsaufgaben werden mithilfe der `imap_unordered`-Methode parallelisiert. `imap_unordered` gibt die Ergebnisse sofort zurück, sobald sie verfügbar sind und kann daher hier verwendet werden, da die Reihenfolge der Ergebnisse nicht wichtig ist.
-     - Sobald der richtige Schlüssel gefunden wird, wird `pool.terminate()` aufgerufen, um alle laufenden Prozesse zu beenden.
+     - Die `partial`-Funktion von `functools` wird verwendet, um die `brute_force_worker`-Funktion partiell zu instanziieren.
+     - Ein Pool von Prozessen wird erstellt und die Entschlüsselungsaufgaben werden parallelisiert.
+     - Je nach `terminate_on_first_match` wird entweder beim ersten Fund gestoppt oder alle Kombinationen getestet.
 
 #### Implementierte Optimierungen
 
-- **Verwendung von `functools.partial`**: Die Verwendung von `partial` sorgt dafür, dass `cipher_text` und `known_plaintext_start` nur einmal festgelegt und nicht bei jedem Task-Aufruf an die Worker-Funktion übergeben werden müssen. Dies spart Speicherplatz und verringert die Anzahl der zu übergebenden Argumente.
+- **Verwendung von `functools.partial`**: Optimiert die Parameterübergabe an Worker-Prozesse.
+- **Multiprocessing**: Parallele Ausführung der Brute-Force-Operation mit `multiprocessing.Pool`.
+- **Effiziente Iteratoren**: Verwendung von `itertools.product` und `itertools.chain` für Speichereffizienz.
+- **Optimale Chunk-Größe**: Berechnung einer optimalen Chunk-Größe für gleichmäßige CPU-Auslastung.
+- **Optionales frühes Stoppen**: Flexibilität zwischen schneller Erstfund-Suche und vollständiger Analyse.
 
-- **Multiprocessing**: Die Implementierung verwendet die `multiprocessing.Pool`-Bibliothek, um die Brute-Force-Operation parallel auszuführen. Jeder Prozess bearbeitet einen Teil der Schlüssel, was die gesamte Berechnungszeit zu verkürzen. Für die parallele Verarbeitung wird die `imap_unordered`-Methode verwendet. Diese gibt die Ergebnisse sofort zurück, sobald sie verfügbar sind und kann daher hier verwendet werden, da die Reihenfolge der Ergebnisse nicht wichtig ist. Somit kann auch frühzeitig gestoppt werden, sobald der richtige Schlüssel gefunden wird.
+### Beispielaufrufe und Ergebnisse
 
-- **Verwendung von `itertools.product` und `itertools.chain`**: Die `itertools.product`-Funktion wird verwendet, um alle möglichen Buchstabenkombinationen für einen Schlüssel zu generieren. Die `itertools.chain`-Funktion wird verwendet, um die Ergebnisse der `product`-Funktion in einem einzigen Generator zu kombinieren. Dadurch wird Speiherplatz gespart und die einzelnen Task können über alle Schlüssellängen hinweg effizient verteilt werden.
+1. **Validierung der Verschlüsselungsfunktionen**
+   ```
+   Plain text: test
+   Cipher text: diqd
+   Decrypted text: test
+   ```
 
-- **Optimale Chunk-Größe**: Die Funktion berechnet eine optimale Chunk-Größe, sodass die einzelnen Task gleichmäßig auf die verfügbaren CPU-Kerne verteilt werden. Die Chunk-Größe wird so berechnet, dass sie entweder auf die Anzahl der CPU-Kerne abgestimmt ist oder eine Obergrenze von 30.000 Aufgaben pro Chunk hat.
+2. **Brute-Force mit frühem Stopp (max_key_length=5)**
+   ```
+   Total number of possible combinations: 12356630
+   Key found: xmkey after 11233503 steps
+   Decrypted text: helloworld
+   Time taken: 8.97 seconds
+   ```
 
-- **Frühes Stoppen**: Sobald der richtige Schlüssel gefunden wird, beendet `pool.terminate()` alle laufenden Prozesse, um die Ressourcennutzung zu minimieren.
+3. **Brute-Force mit frühem Stopp (max_key_length=6)**
+   ```
+   Total number of possible combinations: 321272406
+   Key found: xmkey after 11203503 steps
+   Decrypted text: helloworld
+   Time taken: 8.83 seconds
+   ```
 
-### Beispielaufrufe
+4. **Brute-Force ohne frühen Stopp (max_key_length=5)**
+   ```
+   Total number of possible combinations: 12356630
+   Key found: xmkey after 12356630 steps
+   Decrypted text: helloworld
+   Time taken: 9.74 seconds
+   ```
 
-1. **Validierung der Verschlüsselungs- und Entschlüsselungsfunktionen**
-   - Im ersten Schritt wird die Funktionalität der `vigenere_encrypt` und `vigenere_decrypt` Funktionen getestet.
-   - Hierzu wird der Text "test" mit dem Schlüssel "key" verschlüsselt und anschließend wieder entschlüsselt:
-     ```python
-      # Define plain text and print
-      plain_text = 'test'
-      key = 'key'
+5. **Brute-Force ohne frühen Stopp (max_key_length=6)**
+   ```
+   Total number of possible combinations: 321272406
+   Key found: xmkeyz after 321272406 steps
+   Decrypted text: helloudpfx
+   Time taken: 257.96 seconds
+   ```
 
-      print("Step1: Validate the cypther and decypher functions")
-      print(f"Plain text: {plain_text}")
+### Analyse der Ergebnisse
 
-      # Encrypt the plain text
-      cipher_text = vigenere_encrypt(plain_text, key)
+Die Ergebnisse zeigen interessante Muster:
 
-      # Print the cipher text
-      print(f"Cipher text: {cipher_text}")
+1. **Mit frühem Stopp** (Tests 2 & 3):
+   - Beide Tests finden den gleichen Schlüssel "xmkey" nach etwa 11.2 Millionen Schritten
+   - Die Ausführungszeiten sind fast identisch (~8.9 Sekunden)
+   - Die theoretische Gesamtzahl der Kombinationen spielt keine Rolle, da nach dem Fund gestoppt wird
 
-      # Validate the functions
-      decrypted_text = vigenere_decrypt(cipher_text, key)
-      print(f"Decrypted text: {decrypted_text}")
-     ```
-   - Das Ergebnis wird überprüft, ob der entschlüsselte Text mit dem ursprünglichen Text übereinstimmt:
-     ```python
-     assert decrypted_text == plain_text, "Decryption failed"
-     ```
-   - **Konsolenausgabe**:
-     ```
-     Step1: Validate the cypther and decypher functions
-     Plain text: test
-     Cipher text: diqd
-     Decrypted text: test
-     ```
-
-2. **Brute-Force-Angriff**
-   - **Schritt 2**: Ein Brute-Force-Angriff mit einer maximalen Schlüssellänge von 5 wird ausgeführt, um den verschlüsselten Text "eqvpmtabpb" zu knacken:
-     ```python
-      cipher_text = "eqvpmtabpb"
-      known_plaintext_start = "hello"
-      print("\nStep2: Perform brute force attack (max key length = 5)")
-      print(f"Cipher text: {cipher_text}")
-      print(f"Known plaintext start: {known_plaintext_start}")
-
-      # Start timer
-      start_time = time.time()
-
-      # Perform brute force attack
-      key, decrypted_text = brute_force_vigenere(cipher_text, known_plaintext_start, max_key_length=5)
-
-      # End timer
-      end_time = time.time()
-      # Print results
-      if key and decrypted_text:
-         print(f"Key found: {key}")
-         print(f"Decrypted text: {decrypted_text}")
-         print(f"Time taken: {end_time - start_time} seconds")
-      
-      else:
-         print(f"No valid key found. Time taken: {end_time - start_time} seconds")
-     ```
-   - **Konsolenausgabe**:
-     ```
-     Step2: Perform brute force attack (max key length = 5)
-     Cipher text: eqvpmtabpb
-     Known plaintext start: hello
-     Total number of possible combinations: 12356630
-     Key found: xmkey
-     Decrypted text: helloworld
-     Time taken: 24.317224979400635 seconds
-     ```
-   
-   - **Schritt 3**: Der gleiche Angriff wird mit einer maximalen Schlüssellänge von 6 durchgeführt, um die Dauer der Schlüsselgenerierung und Entschlüsselung mit einer längeren Schlüssellänge zu vergleichen:
-     ```python
-      print("\nStep3: Perform brute force attack (max key length = 6)")
-      print(f"Cipher text: {cipher_text}")
-      print(f"Known plaintext start: {known_plaintext_start}")
-
-      # Start timer
-      start_time = time.time()
-
-      # Perform brute force attack
-      key, decrypted_text = brute_force_vigenere(cipher_text, known_plaintext_start, max_key_length=6)
-
-      # End timer
-      end_time = time.time()
-      # Print results
-      if key and decrypted_text:
-         print(f"Key found: {key}")
-         print(f"Decrypted text: {decrypted_text}")
-         print(f"Time taken: {end_time - start_time} seconds")
-      
-      else:
-         print(f"No valid key found. Time taken: {end_time - start_time} seconds")
-     ```
-   - **Konsolenausgabe**:
-     ```
-     Step3: Perform brute force attack (max key length = 6)
-     Cipher text: eqvpmtabpb
-     Known plaintext start: hello
-     Total number of possible combinations: 321272406
-     Key found: xmkey
-     Decrypted text: helloworld
-     Time taken: 23.0162672996521 seconds
-     ```
+2. **Ohne frühen Stopp** (Tests 4 & 5):
+   - Test 4 bestätigt den Schlüssel "xmkey" nach Durchlauf aller 12.3 Millionen Kombinationen
+   - Test 5 findet einen anderen Schlüssel "xmkeyz" nach Durchlauf aller 321.2 Millionen Kombinationen
+   - Die Ausführungszeit für max_key_length=6 ist deutlich länger (257.96 Sekunden)
+   - Dies demonstriert den exponentiellen Anstieg der Berechnungszeit mit der Schlüssellänge
