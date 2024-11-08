@@ -43,8 +43,10 @@ def brute_force_vigenere(cipher_text, known_plaintext_start, max_key_length, ter
     right_step = None
     with Pool(processes=cpu_count()) as pool:
         # Iterate over all possible keys using multiprocessing
-        for step, result in enumerate(pool.imap_unordered(worker, key_combinations, chunksize=opt_chucksize)):
+        for step, result in enumerate(pool.imap_unordered(worker, key_combinations, chunksize=opt_chucksize), start=1):
+            # Get worker results
             key, decrypted_text = result
+            right_step = step
 
             # Terminate the pool if a valid key is found
             if key:
