@@ -20,7 +20,7 @@ def brute_force_worker(key, cipher_text, known_plaintext_start):
     return (key, decrypted_text) if decrypted_text.startswith(known_plaintext_start) else (None, None)
         
 
-def brute_force_vigenere(cipher_text, known_plaintext_start, max_key_length):
+def brute_force_vigenere(cipher_text, known_plaintext_start, max_key_length, terminate_when_found=True):
     # Genrate a partial function ==> This way cipher_text and known_plaintext_start are fixed and dont have to be appended for each task
     worker = partial(brute_force_worker,
         cipher_text=cipher_text,
@@ -38,6 +38,8 @@ def brute_force_vigenere(cipher_text, known_plaintext_start, max_key_length):
     opt_chucksize = min(num_total_combinations // cpu_count(), MAX_CHUNKSIZE)
 
     # Perform the brute force attack using multiprocessing
+    right_key = None
+    right_text = None
     with Pool(processes=cpu_count()) as pool:
         # Iterate over all possible keys using multiprocessing
         for result in pool.imap_unordered(worker, key_combinations, chunksize=opt_chucksize):
@@ -45,10 +47,16 @@ def brute_force_vigenere(cipher_text, known_plaintext_start, max_key_length):
 
             # Terminate the pool if a valid key is found
             if key:
-                pool.terminate() 
-                return key, decrypted_text
+                # Set key for return value
+                right_key = key
+                right_text = decrypted_text
+
+                # Terminate the pool if terminate_when_found is set to True
+                if terminate_when_found:
+                    pool.terminate()
+                    return right_key, right_text
             
-    return None, None
+    return right_key, right_text
 
 if __name__ == "__main__":
     # Step1: Valdiate the cypther and decypher functions
@@ -70,12 +78,12 @@ if __name__ == "__main__":
     print(f"Decrypted text: {decrypted_text}")
     assert decrypted_text == plain_text, "Decryption failed"
 
-    # Step2: Perform brute force attack
+    # Step2: Perform brute force attack with early termination
     # Known cipher text and known plaintext start
     cipher_text = "eqvpmtabpb"
     known_plaintext_start = "hello"
 
-    print("\nStep2: Perform brute force attack (max key length = 5)")
+    print("\nStep2: Perform brute force attack (max key length = 5) with early termination")
     print(f"Cipher text: {cipher_text}")
     print(f"Known plaintext start: {known_plaintext_start}")
 
@@ -83,7 +91,7 @@ if __name__ == "__main__":
     start_time = time.time()
 
     # Perform brute force attack
-    key, decrypted_text = brute_force_vigenere(cipher_text, known_plaintext_start, max_key_length=5)
+    key, decrypted_text = brute_force_vigenere(cipher_text, known_plaintext_start, max_key_length=5, terminate_when_found=True)
 
     # End timer
     end_time = time.time()
@@ -96,8 +104,8 @@ if __name__ == "__main__":
     else:
         print(f"No valid key found. Time taken: {end_time - start_time} seconds")
 
-    # Step3: Perform brute force attack with max key length = 6
-    print("\nStep3: Perform brute force attack (max key length = 6)")
+    # Step3: Perform brute force attack with max key length = 6 with early termination
+    print("\nStep3: Perform brute force attack (max key length = 6) with early termination")
     print(f"Cipher text: {cipher_text}")
     print(f"Known plaintext start: {known_plaintext_start}")
 
@@ -105,7 +113,55 @@ if __name__ == "__main__":
     start_time = time.time()
 
     # Perform brute force attack
-    key, decrypted_text = brute_force_vigenere(cipher_text, known_plaintext_start, max_key_length=6)
+    key, decrypted_text = brute_force_vigenere(cipher_text, known_plaintext_start, max_key_length=6, terminate_when_found=True)
+
+    # End timer
+    end_time = time.time()
+    # Print results
+    if key and decrypted_text:
+        print(f"Key found: {key}")
+        print(f"Decrypted text: {decrypted_text}")
+        print(f"Time taken: {end_time - start_time} seconds")
+    
+    else:
+        print(f"No valid key found. Time taken: {end_time - start_time} seconds")
+
+    # Step4: Perform brute force attack with early termination
+    # Known cipher text and known plaintext start
+    cipher_text = "eqvpmtabpb"
+    known_plaintext_start = "hello"
+
+    print("\nStep4: Perform brute force attack (max key length = 5) without early termination")
+    print(f"Cipher text: {cipher_text}")
+    print(f"Known plaintext start: {known_plaintext_start}")
+
+    # Start timer
+    start_time = time.time()
+
+    # Perform brute force attack
+    key, decrypted_text = brute_force_vigenere(cipher_text, known_plaintext_start, max_key_length=5, terminate_when_found=False)
+
+    # End timer
+    end_time = time.time()
+    # Print results
+    if key and decrypted_text:
+        print(f"Key found: {key}")
+        print(f"Decrypted text: {decrypted_text}")
+        print(f"Time taken: {end_time - start_time} seconds")
+    
+    else:
+        print(f"No valid key found. Time taken: {end_time - start_time} seconds")
+
+    # Step5: Perform brute force attack with max key length = 6 with early termination
+    print("\nStep5: Perform brute force attack (max key length = 6) without early termination")
+    print(f"Cipher text: {cipher_text}")
+    print(f"Known plaintext start: {known_plaintext_start}")
+
+    # Start timer
+    start_time = time.time()
+
+    # Perform brute force attack
+    key, decrypted_text = brute_force_vigenere(cipher_text, known_plaintext_start, max_key_length=6, terminate_when_found=False)
 
     # End timer
     end_time = time.time()
