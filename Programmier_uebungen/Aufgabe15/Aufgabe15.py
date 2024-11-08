@@ -20,7 +20,7 @@ def brute_force_worker(key, cipher_text, known_plaintext_start):
     return (key, decrypted_text) if decrypted_text.startswith(known_plaintext_start) else (None, None)
         
 
-def brute_force_vigenere(cipher_text, known_plaintext_start, max_key_length, terminate_when_found=True):
+def brute_force_vigenere(cipher_text, known_plaintext_start, max_key_length, terminate_on_first_match=True):
     # Genrate a partial function ==> This way cipher_text and known_plaintext_start are fixed and dont have to be appended for each task
     worker = partial(brute_force_worker,
         cipher_text=cipher_text,
@@ -40,9 +40,10 @@ def brute_force_vigenere(cipher_text, known_plaintext_start, max_key_length, ter
     # Perform the brute force attack using multiprocessing
     right_key = None
     right_text = None
+    right_step = None
     with Pool(processes=cpu_count()) as pool:
         # Iterate over all possible keys using multiprocessing
-        for result in pool.imap_unordered(worker, key_combinations, chunksize=opt_chucksize):
+        for step, result in enumerate(pool.imap_unordered(worker, key_combinations, chunksize=opt_chucksize)):
             key, decrypted_text = result
 
             # Terminate the pool if a valid key is found
@@ -50,13 +51,14 @@ def brute_force_vigenere(cipher_text, known_plaintext_start, max_key_length, ter
                 # Set key for return value
                 right_key = key
                 right_text = decrypted_text
+                right_step = step
 
                 # Terminate the pool if terminate_when_found is set to True
-                if terminate_when_found:
+                if terminate_on_first_match:
                     pool.terminate()
-                    return right_key, right_text
+                    return right_key, right_text, right_step
             
-    return right_key, right_text
+    return right_key, right_text, right_step
 
 if __name__ == "__main__":
     # Step1: Valdiate the cypther and decypher functions
@@ -91,13 +93,18 @@ if __name__ == "__main__":
     start_time = time.time()
 
     # Perform brute force attack
-    key, decrypted_text = brute_force_vigenere(cipher_text, known_plaintext_start, max_key_length=5, terminate_when_found=True)
+    key, decrypted_text, step = brute_force_vigenere(
+        cipher_text, 
+        known_plaintext_start, 
+        max_key_length=5, 
+        terminate_on_first_match=True
+    )
 
     # End timer
     end_time = time.time()
     # Print results
     if key and decrypted_text:
-        print(f"Key found: {key}")
+        print(f"Key found: {key} after {step} steps")
         print(f"Decrypted text: {decrypted_text}")
         print(f"Time taken: {end_time - start_time} seconds")
     
@@ -113,13 +120,18 @@ if __name__ == "__main__":
     start_time = time.time()
 
     # Perform brute force attack
-    key, decrypted_text = brute_force_vigenere(cipher_text, known_plaintext_start, max_key_length=6, terminate_when_found=True)
+    key, decrypted_text, step = brute_force_vigenere(
+        cipher_text, 
+        known_plaintext_start, 
+        max_key_length=6, 
+        terminate_on_first_match=True
+    )
 
     # End timer
     end_time = time.time()
     # Print results
     if key and decrypted_text:
-        print(f"Key found: {key}")
+        print(f"Key found: {key} after {step} steps")
         print(f"Decrypted text: {decrypted_text}")
         print(f"Time taken: {end_time - start_time} seconds")
     
@@ -139,13 +151,18 @@ if __name__ == "__main__":
     start_time = time.time()
 
     # Perform brute force attack
-    key, decrypted_text = brute_force_vigenere(cipher_text, known_plaintext_start, max_key_length=5, terminate_when_found=False)
+    key, decrypted_text, step = brute_force_vigenere(
+        cipher_text, 
+        known_plaintext_start, 
+        max_key_length=5, 
+        terminate_on_first_match=False
+    )
 
     # End timer
     end_time = time.time()
     # Print results
     if key and decrypted_text:
-        print(f"Key found: {key}")
+        print(f"Key found: {key} after {step} steps")
         print(f"Decrypted text: {decrypted_text}")
         print(f"Time taken: {end_time - start_time} seconds")
     
@@ -161,13 +178,18 @@ if __name__ == "__main__":
     start_time = time.time()
 
     # Perform brute force attack
-    key, decrypted_text = brute_force_vigenere(cipher_text, known_plaintext_start, max_key_length=6, terminate_when_found=False)
+    key, decrypted_text, step = brute_force_vigenere(
+        cipher_text, 
+        known_plaintext_start, 
+        max_key_length=6, 
+        terminate_on_first_match=False
+    )
 
     # End timer
     end_time = time.time()
     # Print results
     if key and decrypted_text:
-        print(f"Key found: {key}")
+        print(f"Key found: {key} after {step} steps")
         print(f"Decrypted text: {decrypted_text}")
         print(f"Time taken: {end_time - start_time} seconds")
     
