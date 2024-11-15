@@ -14,7 +14,7 @@ def brute_force_worker(key, cipher_text, known_plaintext_start):
     key = "".join(key)
 
     # Decrpyt the cipher text using the current key
-    decrypted_text = vigenere_decrypt(cipher_text, key)
+    decrypted_text = vigenere_decrypt(cipher_text, key, known_plaintext_start)
 
     # Check if the decrypted text starts with the known plaintext start and return
     return (key, decrypted_text) if decrypted_text.startswith(known_plaintext_start) else (None, None)
