@@ -1,5 +1,5 @@
 from Aufgabe1 import get_valid_input
 
-number = get_valid_input("Zahl: ", cast_to=int)
+number = get_valid_input("Zahl: ")
 
-print("Ziffernsummee:", sum([int(i) for i in str(number)]))
+print("Ziffernsummee:", sum([int(i) for i in number]))
