@@ -5,6 +5,9 @@ channels:
 dependencies:
   # General
   - python=3.12.*
+  - numpy
+  - seaborn
+  - matplotlib
   - pip
   - pip:
     - repopack
