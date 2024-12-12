@@ -1,8 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-frame = r"C:\Users\Julian\OneDrive - FH OOe\Kurse\3. Semester\WPP3IL\images\frame_gray.png"
-stinkbug = r"C:\Users\Julian\OneDrive - FH OOe\Kurse\3. Semester\WPP3IL\images\stinkbug_gray.png"
+frame = r"C:\Users\Julian\OneDrive - FH OOe\Kurse\3. Semester\WPP3IL\images\frame_color.png"
+stinkbug = r"C:\Users\Julian\OneDrive - FH OOe\Kurse\3. Semester\WPP3IL\images\stinkbug_color.png"
 
 
 size_x, size_y = (78, 435), (80, 351)
