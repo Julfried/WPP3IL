@@ -8,6 +8,7 @@ dependencies:
   - numpy
   - seaborn
   - matplotlib
+  - pandas
   - pip
   - pip:
     - repopack
