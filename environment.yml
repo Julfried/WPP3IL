@@ -9,6 +9,7 @@ dependencies:
   - seaborn
   - matplotlib
   - pandas
+  - pytest
   - pip
   - pip:
     - repopack
