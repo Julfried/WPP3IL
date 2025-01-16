@@ -18,9 +18,6 @@ df['WHght'] = pd.to_numeric(df['WHght'], errors='coerce')
 # Filter out rows with missing values in HHght and WHght
 df = df.dropna(subset=['HHght', 'WHght'])
 
-# Drop rows with missing values in HHght and WHght
-df.dropna(subset=['HHght', 'WHght'], inplace=True)
-
 # Remove heights with a value of 0 (A height of 0 is not possible)
 df = df[(df['HHght'] != 0) & (df['WHght'] != 0)]
 
