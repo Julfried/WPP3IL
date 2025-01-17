@@ -1,7 +1,11 @@
 class GameEntity:
     def __init__(self, name, health): # constructor
         self.name = name
-        self.health = health
+        self._health = health
+
+    @property
+    def health(self):
+        return self._health
 
     def display_info(self):
         print(f"{self.name} has health {self.health}")
