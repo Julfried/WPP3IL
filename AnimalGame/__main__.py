@@ -19,10 +19,10 @@ if __name__ == "__main__":
             case "chicken":
                 for _ in range(count):
                     animals.append(Chicken())
-            case "cow":
+            case "cows":
                 for _ in range(count):
                     animals.append(Cow())
-            case "parrot":
+            case "parrots":
                 for _ in range(count):
                     animals.append(Parrot())
 
