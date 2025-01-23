@@ -1,5 +1,0 @@
-from .game_entity import GameEntity
-
-class Player(GameEntity):
-    def __init__(self, name):
-        return super().__init__(name, 20)

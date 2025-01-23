@@ -1,5 +1,4 @@
 from .game_entity import GameEntity, FeedAble
-from .player import Player
 
 class Animal(GameEntity, FeedAble):
     nr_instances = 0
@@ -30,16 +29,3 @@ class Chicken(Animal):
     @property
     def noise(self):
         return "Cluck"
-
-if __name__ == "__main__":
-    entities = [
-        Cow(),
-        Parrot(),
-        Parrot(),
-        Chicken(),
-        Player("John")
-    ]
-
-    for entity in entities:
-        if isinstance(entity, FeedAble):
-            entity.eat()

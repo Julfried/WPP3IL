@@ -1,0 +1,7 @@
+[Animals]
+cows = 3
+parrots = 2
+chicken = 3
+
+[PlayerInfo]
+name = "John"
