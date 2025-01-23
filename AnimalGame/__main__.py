@@ -13,18 +13,8 @@ if __name__ == "__main__":
         config = tomllib.load(fp)
 
     # Setup game
-    animals = []
-    for name, count in config["Animals"].items():
-        match name:
-            case "chicken":
-                for _ in range(count):
-                    animals.append(Chicken())
-            case "cows":
-                for _ in range(count):
-                    animals.append(Cow())
-            case "parrots":
-                for _ in range(count):
-                    animals.append(Parrot())
+    animal_classes = {"chicken": Chicken, "cows": Cow, "parrots": Parrot}
+    animals = [animal_classes[name]() for name, count in config["Animals"].items() for _ in range(count)]
 
     # Create a player with name
     player = Player(config["PlayerInfo"]["name"])
