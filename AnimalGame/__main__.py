@@ -1,4 +1,5 @@
 import tomllib
+from pathlib import Path
 from .gamestructure import Player, Animal
 from .farm.animals import Chicken, Cow, Parrot
 
@@ -9,7 +10,8 @@ def do_main_loop(player: Player, animals: list[Animal]):
         animal.display_info()
 
 if __name__ == "__main__":
-    with open("config.toml", mode="rb") as fp:
+    p = Path(__file__).parent / Path("config.toml")
+    with open(p, mode="rb") as fp:
         config = tomllib.load(fp)
 
     # Setup game
