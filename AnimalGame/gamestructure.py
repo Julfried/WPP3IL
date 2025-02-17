@@ -17,6 +17,10 @@ class GameEntity:
     @property
     def health(self):
         return self._health
+    
+    @health.setter
+    def health(self, value):
+        self._health = value
 
     def display_info(self):
         print(f"{self.name} has health {self.health}")
