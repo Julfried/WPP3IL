@@ -1,6 +1,6 @@
 import tomllib
-from .player import Player
-from .animals import Chicken, Cow, Parrot, Animal
+from .gamestructure import Player, Animal
+from .farm.animals import Chicken, Cow, Parrot
 
 # Main game loop
 def do_main_loop(player: Player, animals: list[Animal]):
